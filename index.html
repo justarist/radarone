@@ -1,0 +1,179 @@
+
+<!-- THIS IS THE VISIT PAGE -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RadarOne</title>
+<style>
+    :root {
+        --bg: #0a0a0a;
+        --fg: #ffffff;
+        --accent: #ff4800;
+        --accent-soft: #ef6406;
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        font-family: "Inter", sans-serif;
+        color: var(--fg);
+        overflow-x: hidden;
+    }
+
+    header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 18px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0));
+        backdrop-filter: blur(6px);
+        z-index: 10;
+    }
+
+    header .logo, header .link {
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        user-select: none;
+        transition: opacity .25s ease;
+    }
+
+    header .link:hover {
+        opacity: .6;
+    }
+
+    .grid {
+        display: grid;
+        gap: 22px;
+        padding: 120px 28px 40px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/0.5; 
+    background: #111;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(248, 50, 1, 0.55);
+    transition: transform .35s cubic-bezier(.25,.8,.25,1),
+                box-shadow .35s cubic-bezier(.25,.8,.25,1),
+                border-color .35s ease;
+}
+
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 0 22px rgba(255, 66, 13, 0.35);
+        border-color: var(--accent-soft);
+    }
+
+    .card-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        filter: blur(2px) brightness(0.55);
+        transform: scale(1.12);
+        z-index: 1;
+    }
+
+    .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.2));
+        z-index: 2;
+    }
+
+    .card span {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: .5px;
+        color: var(--fg);
+        text-shadow: 0 0 6px rgba(255, 152, 26, 0.7);
+        z-index: 3;
+    }
+
+    .glow {
+        position: fixed;
+        pointer-events: none;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(255, 136, 0, 0.2) 0%, transparent 60%);
+        opacity: .25;
+        animation: pulse 6s ease-in-out infinite;
+        z-index: -1;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: .25; }
+        50% { transform: scale(1.15); opacity: .38; }
+        100% { transform: scale(1); opacity: .25; }
+    }
+</style>
+</head>
+
+<body>
+<header>
+    <div class="logo">RadarOne</div>
+    <!-- <div class="link" onclick="window.open('https://github.com/perlch', '_blank')">search me</div> -->
+</header>
+
+<div class="glow"></div>
+
+<div class="grid" id="projectGrid"></div>
+
+<script>
+const projects = [
+    { 
+        name: "RadarOne | Telegram Bot", 
+        url: "https://t.me/radaronebot",
+        img: "https://github.com/justarist/radarone/blob/main/RadarOne.png?raw=true"  
+    },
+    { 
+        name: "RadarOne | Telegram Channel", 
+        url: "https://t.me/radaroneteam",
+        img: "https://github.com/justarist/radarone/blob/main/RadarOne.png?raw=true"
+    },
+    {
+        name: "RadarOne | Online Map",
+        url: "https://www.google.com/imgres?q=%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B0%20temporary%20unavailable&imgurl=https%3A%2F%2Ft3.ftcdn.net%2Fjpg%2F04%2F87%2F13%2F44%2F360_F_487134400_ZnxMUxATrwBEC8BtctMWZaX9VuQQ6GG0.jpg&imgrefurl=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3D%2522temporarily%2Bunavailable%2522&docid=4T72KTb36ZvJeM&tbnid=Qz2Wk8aCjHyeUM&vet=12ahUKEwje5v-n3_6QAxVEnf0HHZpHB3kQM3oECBsQAA..i&w=720&h=360&hcb=2&ved=2ahUKEwje5v-n3_6QAxVEnf0HHZpHB3kQM3oECBsQAA",
+        img: "https://github.com/justarist/radarone/blob/main/RadarOne.png?raw=true"
+    }
+];
+
+const grid = document.getElementById("projectGrid");
+
+projects.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.onclick = () => window.open(p.url, "_blank");
+
+    const bg = document.createElement("div");
+    bg.className = "card-bg";
+    bg.style.backgroundImage = `url(${p.img})`;
+
+    const title = document.createElement("span");
+    title.textContent = p.name;
+
+    card.appendChild(bg);
+    card.appendChild(title);
+    grid.appendChild(card);
+});
+</script>
+
+</body>
+</html>
