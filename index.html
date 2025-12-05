@@ -1,4 +1,5 @@
 <!-- VISIT PAGE, FOR MAP GO TO radarone.online -->
+<!-- MAP WILL BE LOADED SOON TO GITHUB -->
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -6,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Radar ONE</title>
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/RadarOne.webp">
+<link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/images/icons/logo.webp">
 <style>
     :root {
         --bg: #0a0a0a;
@@ -59,18 +60,18 @@
     }
 
     .card {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1/0.5; 
-    background: #111;
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid rgba(248, 50, 1, 0.55);
-    transition: transform .35s cubic-bezier(.25,.8,.25,1),
-                box-shadow .35s cubic-bezier(.25,.8,.25,1),
-                border-color .35s ease;
-}
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1/0.5; 
+        background: #111;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid rgba(248, 50, 1, 0.55);
+        transition: transform .35s cubic-bezier(.25,.8,.25,1),
+                    box-shadow .35s cubic-bezier(.25,.8,.25,1),
+                    border-color .35s ease;
+    }
 
     .card:hover {
         transform: translateY(-6px);
@@ -133,7 +134,7 @@
 
 <body>
 <header>
-    <div class="logo">Radar ONE</div>
+    <div class="logo" onclick="window.open('https://radarone.online', '_blank')">Radar ONE | Visit page</div>
     <div class="link" onclick="window.open('https://github.com/justarist/radarone', '_blank')">GitHub</div>
 </header>
 
@@ -146,17 +147,17 @@ const projects = [
     { 
         name: "Radar ONE | Телеграм-Бот", 
         url: "https://t.me/radaronebot",
-        img: "https://github.com/justarist/radarone/blob/main/RadarOne.webp?raw=true"  
+        img: "https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/images/icons/logo.webp"  
     },
     { 
         name: "Radar ONE | Телеграм-Канал", 
         url: "https://t.me/s/radaroneteam",
-        img: "https://github.com/justarist/radarone/blob/main/RadarOne.webp?raw=true"
+        img: "https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/images/icons/logo.webp"
     },
     {
         name: "Radar ONE | Онлайн-Карта",
         url: "https://radarone.online/",
-        img: "https://github.com/justarist/radarone/blob/main/RadarOne.webp?raw=true"
+        img: "https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/images/icons/logo.webp"
     }
 ];
 
