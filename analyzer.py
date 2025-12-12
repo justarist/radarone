@@ -81,7 +81,6 @@ ALL - все опасности.
                 host="https://ollama.com",
                 headers={"Authorization": f"Bearer {os.getenv("OLLAMA_API_KEY")}"}
             )
-            #ollama_client = Client()
             messages = [
                 {
                     'role': 'user',
