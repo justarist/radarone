@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 
 TYPE_LABEL = {
     "UAV": "атаки БПЛА",
@@ -7,31 +8,34 @@ TYPE_LABEL = {
     "UB": "атаки безэкипажного катера (БЭК)"
 }
 
-LEVEL_READABLE = {
+STATUS_READABLE = {
     "HD": "Высокий",
     "MD": "Средний",
     "AC": "Отбой/Нет угрозы"
 }
 
-def format_notification(region: str, danger_type: str, level: str, source: str) -> str:
-    tlabel = TYPE_LABEL.get(danger_type, danger_type)
-    lread = LEVEL_READABLE.get(level, level)
-    ts = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-    if level == "AC":
-        return (
-            f"✅ ОТБОЙ тревоги\n"
-            f"Регион: {region}\n"
-            f"Тип угрозы: {tlabel}\n"
-            f"Статус: {lread}\n"
-            f"Источник: @{source}\n"
-            f"Время: {ts}"
-        )
+def format_notification(region: str, attack_type: str, status: str, source: str, comment: str = None) -> str:
+    attack_type = TYPE_LABEL.get(attack_type, attack_type)
+    status = STATUS_READABLE.get(status, status)
+    timestamp = datetime.now(pytz.timezone("Europe/Moscow")).strftime("%H:%M:%S %d-%m-%Y")
+    if status == "AC":
+        result = f"""
+            <b>✅ ОТБОЙ тревоги</b>\n
+            Регион: {region}\n
+            Тип угрозы: {attack_type}\n
+            Статус: {status}\n
+            Источник: @{source}\n
+            Время: {timestamp}
+        """
     else:
-        return (
-            f"⚠️ ВНИМАНИЕ!\n"
-            f"Угроза {tlabel}\n"
-            f"Регион: {region}\n"
-            f"Уровень: {lread}\n"
-            f"Источник: @{source}\n"
-            f"Время: {ts}"
-        )
+        result = f"""
+            <b>⚠️ ВНИМАНИЕ!</b>\n
+            Угроза {attack_type}\n
+            Регион: {region}\n
+            Уровень: {status}\n
+            Источник: @{source}\n
+            Время: {timestamp}
+        """
+    if comment:
+        result += f"\n\n<i>💬 Комментарий: {comment}</i>"
+    return result
