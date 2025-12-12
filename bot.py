@@ -328,7 +328,7 @@ async def handle_report_response(update: Update, context: ContextTypes.DEFAULT_T
 
 async def admin_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = " ".join(context.args).split(" ", 1)
-    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+    if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /ban without admin permissions.")
         return
     try:
@@ -343,7 +343,7 @@ async def admin_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def admin_unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = " ".join(context.args).split(" ", 1)
-    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+    if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /unban without admin permissions.")
         return
     try:
@@ -358,7 +358,7 @@ async def admin_unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def admin_is_banned(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = context.args
-    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+    if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /is_banned without admin permission.")
         return
     try:
@@ -372,7 +372,7 @@ async def admin_is_banned(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = " ".join(context.args).split(";", 1)
-    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+    if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_report without admin permissions.")
         return
     try:
@@ -382,7 +382,7 @@ async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send report via /admin_report but something went wrong", exc_info=True)
 
 async def admin_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+    if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_message without admin permissions.")
         return
     try:
