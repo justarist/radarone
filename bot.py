@@ -407,6 +407,7 @@ def main():
     application.add_handler(CommandHandler("unban", admin_unban))
     application.add_handler(CommandHandler("is_banned", admin_is_banned))
     application.add_handler(CommandHandler("admin_report", admin_report))
+    application.add_handler(CommandHandler("admin_message", admin_message))
     application.add_handler(CallbackQueryHandler(handle_button_click, pattern=r"^(subscribe|unsubscribe|status)_page_"))
     application.add_handler(CallbackQueryHandler(handle_button_click))
     
