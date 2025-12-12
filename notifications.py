@@ -34,5 +34,5 @@ def format_notification(region: str, attack_type: str, status: str, source: str,
             f"Источник: {source}\n"
             f"Время: {timestamp}\n")
     if comment:
-        result += f"\n\n💬 Комментарий:\n<i>{comment}</i>"
+        result += f"\n💬 Комментарий:\n<i>{comment}</i>"
     return result
