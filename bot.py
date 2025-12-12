@@ -6,7 +6,7 @@ from logger import logger
 import os
 import db
 from time import sleep
-from pytz import timezone
+import pytz
 from listener import process_message
 
 load_dotenv()
@@ -14,6 +14,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 REPORT_WAITING = 1
 REGIONS_PER_PAGE = 10
+
+TEMP_USER_ID = None
+TEMP_TIMESTAMP = None
 
 async def send_region_page(update: Update, context: ContextTypes.DEFAULT_TYPE, page = 0, array = region_names, command = "subscribe", last_command = "`/subscribe all` - подписаться на все регионы"):
     total_pages = (len(array) - 1) // REGIONS_PER_PAGE + 1
@@ -78,11 +81,11 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         original_message = data["original_message"]
 
         if action == "approve":
-            await query.edit_message_text(f"🆔 User ID: <code>{query.from_user.id}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <code>{TEMP_USER_ID}</code>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} approved message in /report (msg_id: {msg_id})")
             await process_message(message=original_message, source="radaronebot (/report)", is_bot=True)
         elif action == "reject":
-            await query.edit_message_text(f"🆔 User ID: <code>{query.from_user.id}</code>\n❌ Message has been rejected.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <code>{TEMP_USER_ID}</code>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n❌ Message has been rejected.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} rejected message in /report (msg_id: {msg_id})")
         else:
             await query.edit_message_text("❓ Unsupported action.")
@@ -129,7 +132,7 @@ async def _set_commands(app):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"[BOT] User {update.effective_user.id} called /start")
     await update.message.reply_text(
-        "👋 Привет! Я бот мониторинга тревог.\n\n"
+        "👋 Привет! Это бот для мониторинга тревог Радар ONE.\n\n"
         "Используй /help для списка команд.\n"
         "Важно: перед тем как ждать уведомления — нажми /start и /subscribe <регион>."
     )
@@ -308,59 +311,75 @@ async def handle_report_response(update: Update, context: ContextTypes.DEFAULT_T
         admin_user_id,
         text=(
             f"🆔 User ID: <code>{user_id}</code>\n"
-            f"⌛️ Sending time: <code>{message_time.astimezone(timezone('Europe/Moscow')).strftime('%H:%M:%S %d-%m-%Y')}</code>"
+            f"⌛️ Sending time: <code>{message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')}</code>"
         ),
         reply_markup=InlineKeyboardMarkup(approval_buttons),
         parse_mode="HTML"
     )
+
+    global TEMP_USER_ID
+    global TEMP_TIMESTAMP
+    TEMP_USER_ID = user_id
+    TEMP_TIMESTAMP = message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')
 
     await update.message.reply_text("✅ Ваше сообщение отправлено на проверку.")
     logger.info(f"[BOT] User {update.effective_user.id}'s message has been sent for verification to admin.")
     return ConversationHandler.END
 
 async def admin_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_answer = " ".join(context.args).split(" ", 2)
-    if user_answer[0] != os.getenv("ADMIN_PASSWORD"):
-        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /ban with incorrect admin password.")
+    user_answer = " ".join(context.args).split(" ", 1)
+    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /ban without admin permissions.")
         return
     try:
-        user_id = int(user_answer[1])
+        user_id = int(user_answer[0])
         if not(await db.is_banned(user_id=user_id, use_logger=False, is_bot=True)):
-            await db.ban_user(user_id=user_id, reason=user_answer[2], is_bot=True)
+            await db.ban_user(user_id=user_id, reason=user_answer[1], is_bot=True)
             logger.info(f"[BOT] Admin {update.effective_user.id} banned user {user_id} via /ban.")
         else:
             logger.info(f"[BOT] Admin {update.effective_user.id} attempted to ban already banned user {user_id} via /ban.")
     except Exception as e:
-        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to ban user {user_answer[1]} via /ban but something went wrong", exc_info=True)
+        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to ban user {user_answer[0]} via /ban but something went wrong", exc_info=True)
 
 async def admin_unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_answer = " ".join(context.args).split(" ", 2)
-    if user_answer[0] != os.getenv("ADMIN_PASSWORD"):
-        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /unban with incorrect admin password.")
+    user_answer = " ".join(context.args).split(" ", 1)
+    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /unban without admin permissions.")
         return
     try:
-        user_id = int(user_answer[1])
+        user_id = int(user_answer[0])
         if await db.is_banned(user_id=user_id, use_logger=False, is_bot=True):
-            await db.unban_user(user_id=user_id, reason=user_answer[2], is_bot=True)
+            await db.unban_user(user_id=user_id, reason=user_answer[1], is_bot=True)
             logger.info(f"[BOT] Admin {update.effective_user.id} unbanned user {user_id} via /unban.")
         else:
             logger.info(f"[BOT] Admin {update.effective_user.id} attempted to unban already unbanned user {user_id} via /unban.")
     except Exception as e:
-        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to unban user {user_answer[1]} via /unban but something went wrong", exc_info=True)
+        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to unban user {user_answer[0]} via /unban but something went wrong", exc_info=True)
 
 async def admin_is_banned(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = context.args
-    if user_answer[0] != os.getenv("ADMIN_PASSWORD"):
-        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /is_banned with incorrect admin password.")
+    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /is_banned without admin permission.")
         return
     try:
-        user_id = int(user_answer[1])
+        user_id = int(user_answer[0])
         await update.message.reply_text(
             f"Пользователь {user_id} {'заблокирован' if await db.is_banned(user_id=user_id, use_logger=False, is_bot=True) else 'не заблокирован'}"
         )
         logger.info(f"[BOT] Admin {update.effective_user.id} called /is_banned for user {user_id}")
     except Exception as e:
-        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to use /is_banned for user {user_answer[1]} but something went wrong", exc_info=True)
+        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to use /is_banned for user {user_answer[0]} but something went wrong", exc_info=True)
+
+async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_answer = " ".join(context.args).split(";", 1)
+    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_report without admin permissions.")
+        return
+    try:
+        await process_message(message=user_answer[0], source="Admin", comment=user_answer[1], is_bot=True)
+        logger.info(f"[BOT] Admin {update.effective_user.id} sent report via /admin_report.")
+    except Exception as e:
+        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send report via /admin_report but something went wrong", exc_info=True)
 
 def main():
     application = Application.builder().token(BOT_TOKEN).post_init(_set_commands).build()
@@ -375,6 +394,7 @@ def main():
     application.add_handler(CommandHandler("ban", admin_ban))
     application.add_handler(CommandHandler("unban", admin_unban))
     application.add_handler(CommandHandler("is_banned", admin_is_banned))
+    application.add_handler(CommandHandler("admin_report", admin_report))
     application.add_handler(CallbackQueryHandler(handle_button_click, pattern=r"^(subscribe|unsubscribe|status)_page_"))
     application.add_handler(CallbackQueryHandler(handle_button_click))
     
