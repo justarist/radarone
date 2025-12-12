@@ -20,21 +20,19 @@ def format_notification(region: str, attack_type: str, status: str, source: str,
     timestamp = datetime.now(pytz.timezone("Europe/Moscow")).strftime("%H:%M:%S %d-%m-%Y")
     source = f"@{source}" if source != "Admin" else source
     if status == "AC":
-        result = f"""
-        <b>✅ ОТБОЙ тревоги</b>
-        Регион: {region}
-        Тип угрозы: {attack_type}
-        Статус: {status}
-        Источник: {source}
-        Время: {timestamp}"""
+        result = (f"<b>✅ ОТБОЙ тревоги</b>\n"
+            f"Регион: {region}\n"
+            f"Тип угрозы: {attack_type}\n"
+            f"Статус: {status}\n"
+            f"Источник: {source}\n"
+            f"Время: {timestamp}\n")
     else:
-        result = f"""
-        <b>⚠️ ВНИМАНИЕ!</b>
-        Угроза {attack_type}
-        Регион: {region}
-        Уровень: {status}
-        Источник: {source}
-        Время: {timestamp}"""
+        result = (f"<b>⚠️ ВНИМАНИЕ!</b>\n"
+            f"Угроза {attack_type}\n"
+            f"Регион: {region}\n"
+            f"Уровень: {status}\n"
+            f"Источник: {source}\n"
+            f"Время: {timestamp}\n")
     if comment:
-        result += f"\n💬 Комментарий: <i>{comment}</i>"
+        result += f"\n\n💬 Комментарий:\n<i>{comment}</i>"
     return result
