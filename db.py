@@ -1,6 +1,7 @@
 import asyncio
 import os
 from datetime import datetime
+import pytz
 from telegram import Bot
 import asyncpg
 from logger import logger
@@ -108,7 +109,7 @@ async def get_pool(is_bot: bool = False) -> asyncpg.Pool:
 
 async def save_attack(region: str, attack_type: str, status: str, source: str = "manual", use_logger: bool = True, is_bot: bool = False):
     pool = await get_pool(is_bot=is_bot)
-    timestamp = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+    timestamp = datetime.now(pytz.timezone("Europe/Moscow")).strftime("%H:%M:%S %d-%m-%Y")
     async with pool.acquire() as conn:
         await conn.execute(
             "INSERT INTO attacks (region, attack_type, status, source, timestamp) VALUES ($1, $2, $3, $4, $5)",
@@ -202,23 +203,6 @@ async def get_users_by_region(region: str, use_logger: bool = True, is_bot: bool
         logger.info(f"[DB] Found {len(users)} subscribers in {region}")
     return users
 
-async def update_region(region_name: str, is_bot: bool = False):
-    '''
-    pool = await get_pool(is_bot=is_bot)
-    async with pool.acquire() as conn:
-        await conn.execute(
-            "UPDATE regions SET updated_at = NOW() WHERE region = $1",
-            region_name,
-        )
-        '''
-
-async def update_all_regions(is_bot: bool = False):
-    '''
-    pool = await get_pool(is_bot=is_bot)
-    async with pool.acquire() as conn:
-        await conn.execute("UPDATE regions SET updated_at = NOW()")
-        '''
-
 async def is_banned(user_id: int, use_logger: bool = True, is_bot: bool = False) -> bool:
     pool = await get_pool(is_bot=is_bot)
     async with pool.acquire() as conn:
@@ -234,7 +218,9 @@ async def ban_user(user_id: int, reason: str = "<не указано>", use_logg
     if not await is_banned(user_id=user_id, use_logger=False, is_bot=is_bot):
         pool = await get_pool(is_bot=is_bot)
         async with pool.acquire() as conn:
-            await conn.execute("UPDATE subscriptions SET is_banned=TRUE WHERE user_id=$1", user_id)
+            exist = await conn.fetchrow("SELECT 1 FROM subscriptions WHERE user_id=$1 LIMIT 1", user_id) is not None
+            if exist: await conn.execute("UPDATE subscriptions SET is_banned=TRUE WHERE user_id=$1", user_id)
+            else: await conn.execute("INSERT INTO subscriptions (user_id, is_banned) VALUES ($1, TRUE)", user_id)
         if use_logger:
             logger.info(f"[DB] User {user_id} banned. Reason: {reason}")
         try:
