@@ -63,7 +63,6 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                     continue
             
                 await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
-                await db.update_region(region_name)
 
                 users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                 if not users:
@@ -84,7 +83,6 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                         continue
             
                     await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
-                    await db.update_region(region_name)
 
                     users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                     if not users:
@@ -109,7 +107,6 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                         continue
                 
                     await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
-                    await db.update_region(region_name)
 
                     users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                     if not users:
@@ -131,7 +128,6 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                             continue
                 
                         await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
-                        await db.update_region(region_name)
 
                         users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                         if not users:
