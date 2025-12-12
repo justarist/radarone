@@ -203,6 +203,15 @@ async def get_users_by_region(region: str, use_logger: bool = True, is_bot: bool
         logger.info(f"[DB] Found {len(users)} subscribers in {region}")
     return users
 
+async def get_all_users(use_logger: bool = True, is_bot: bool = False):
+    pool = await get_pool(is_bot=is_bot)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("SELECT DISTINCT user_id FROM subscriptions")
+    users = [r["user_id"] for r in rows]
+    if use_logger:
+        logger.info(f"[DB] Found {len(users)} total subscribers")
+    return users
+
 async def is_banned(user_id: int, use_logger: bool = True, is_bot: bool = False) -> bool:
     pool = await get_pool(is_bot=is_bot)
     async with pool.acquire() as conn:

@@ -381,6 +381,18 @@ async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send report via /admin_report but something went wrong", exc_info=True)
 
+async def admin_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if str(update.effective_user.id) in os.getenv("ADMIN_USER_ID").split(","):
+        logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_message without admin permissions.")
+        return
+    try:
+        message = " ".join(context.args)
+        for user_id in await db.get_all_users(is_bot=True):
+            await context.bot.send_message(chat_id=user_id, text=f"<b>🔔 ВНИМАНИЕ!</b>\n💬 Сообщение от администратора:\n<blockquote>{message}</blockquote>", parse_mode="HTML")
+            logger.info(f"[BOT] Admin {update.effective_user.id} sent message to all users via /admin_message.")
+    except Exception as e:
+        logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send message to all users via /admin_message but something went wrong", exc_info=True)
+
 def main():
     application = Application.builder().token(BOT_TOKEN).post_init(_set_commands).build()
     application.add_handler(CommandHandler("start", start))
