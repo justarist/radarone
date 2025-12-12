@@ -27,8 +27,6 @@ uvicorn_config = {
     "port": PORT,
     "log_level": "info",
     "loop": "asyncio",
-    #"ssl_certfile": "/etc/letsencrypt/live/radarone.online/fullchain.pem", 
-    #"ssl_keyfile": "/etc/letsencrypt/live/radarone.online/privkey.pem",
 }
 
 class ConnectionManager:
@@ -226,8 +224,6 @@ async def stop_services(tasks):
     await asyncio.sleep(0.1)
 
 async def async_main():
-    await db.update_all_regions()
-
     tasks = await start_services()
 
     config = uvicorn.Config(app, **uvicorn_config)
@@ -242,26 +238,6 @@ async def async_main():
     finally:
         await stop_services(tasks)
         await server.shutdown()
-"""
-async def async_main():
-    await db.update_all_regions()
-
-    tasks = await start_services()
-
-    try:
-        await asyncio.to_thread(
-            uvicorn.run,
-            app,
-            host=HOST,
-            port=PORT,
-            log_level="info",
-            #ssl_certfile="/etc/letsencrypt/live/radarone.online/fullchain.pem",
-            #ssl_keyfile="/etc/letsencrypt/live/radarone.online/privkey.pem",
-            loop="asyncio"
-        )
-    finally:
-        await stop_services(tasks)
-"""
 
 def main():
     try:
