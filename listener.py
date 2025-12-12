@@ -29,7 +29,7 @@ def get_last_message(channel_name: str):
         return None
     return messages[-1].get_text("\n", strip=True)
 
-async def process_message(message: str, source: str = "<неизвестно>", is_bot: bool = False):
+async def process_message(message: str, source: str = "<неизвестно>", comment: str = None, is_bot: bool = False):
     try:
         result = analyze_message(message)
     except Exception as e:
@@ -41,10 +41,10 @@ async def process_message(message: str, source: str = "<неизвестно>", 
         if len(parts) != 3:
             logger.warning(f"[LSNR] Invalid format from model: {split_message}")
             continue
-        level, region_name, danger_type = parts
+        status, region_name, attack_type = parts
         region_name = region_name.strip()
-        if danger_type not in ["UAV", "AIR", "ROCKET", "UB", "ALL"]:
-            logger.warning(f"[LSNR] Unknown danger type: {danger_type}")
+        if attack_type not in ["UAV", "AIR", "ROCKET", "UB", "ALL"]:
+            logger.warning(f"[LSNR] Unknown attack type: {attack_type}")
             continue
         if region_name not in region_names:
             for i in range(len(region_names)):
@@ -56,95 +56,91 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                 continue
         
         if region_name != "Россия":
-            if danger_type != "ALL":
-                last_status = await db.get_last_status(region=region_name, attack_type=danger_type, is_bot=is_bot)
-                if last_status == level:
-                    logger.info(f"[LSNR] Repeat (skipping): {region_name} {danger_type} = {level}")
+            if attack_type != "ALL":
+                last_status = await db.get_last_status(region=region_name, attack_type=attack_type, is_bot=is_bot)
+                if last_status == status:
+                    logger.info(f"[LSNR] Repeat (skipping): {region_name} {attack_type} = {status}")
                     continue
             
-                await db.save_attack(region=region_name, attack_type=danger_type, status=level, source=source, is_bot=is_bot)
-                # logger.info(f"[LSNR] Updated: {region_name} {danger_type} = {level}")
+                await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
                 await db.update_region(region_name)
 
                 users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                 if not users:
                     continue
 
-                text = format_notification(region_name, danger_type, level, source)
+                text = format_notification(region_name, attack_type, status, source, comment)
                 for user_id in users:
                     try:
-                        await bot.send_message(chat_id=user_id, text=text)
+                        await bot.send_message(chat_id=user_id, text=text, parse_mode="HTML")
                         await asyncio.sleep(0.05)
                     except Exception as e:
                         logger.error(f"[LSNR] Error sending to user {user_id}", exc_info=True)
-            elif danger_type == "ALL" and level == "AC":
-                for dantype in ["UAV", "AIR", "ROCKET", "UB"]:
-                    last_status = await db.get_last_status(region=region_name, attack_type=dantype, is_bot=is_bot)
-                    if last_status == level:
-                        logger.info(f"[LSNR] Repeat (skipping): {region_name} {dantype} = {level}")
+            elif attack_type == "ALL" and status == "AC":
+                for attack_type in ["UAV", "AIR", "ROCKET", "UB"]:
+                    last_status = await db.get_last_status(region=region_name, attack_type=attack_type, is_bot=is_bot)
+                    if last_status == status:
+                        logger.info(f"[LSNR] Repeat (skipping): {region_name} {attack_type} = {status}")
                         continue
             
-                    await db.save_attack(region=region_name, attack_type=dantype, status=level, source=source, is_bot=is_bot)
-                    # logger.info(f"[LSNR] Updated: {region_name} {dantype} = {level}")
+                    await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
                     await db.update_region(region_name)
 
                     users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                     if not users:
                         continue
 
-                    text = format_notification(region_name, dantype, level, source)
+                    text = format_notification(region_name, attack_type, status, source, comment)
                     for user_id in users:
                         try:
-                            await bot.send_message(chat_id=user_id, text=text)
+                            await bot.send_message(chat_id=user_id, text=text, parse_mode="HTML")
                             await asyncio.sleep(0.05)
                         except Exception as e:
                             logger.error(f"[LSNR] Error sending to user {user_id}", exc_info=True)
-        elif region_name == "Россия" and level == "AC":
-            for regname in region_names:
-                if regname == "Россия":
+        elif region_name == "Россия" and status == "AC":
+            for region_name in region_names:
+                if region_name == "Россия":
                     continue
 
-                if danger_type != "ALL":
-                    last_status = await db.get_last_status(region=regname, attack_type=danger_type, is_bot=is_bot)
-                    if last_status == level:
-                        logger.info(f"[LSNR] Repeat (skipped): {regname} {danger_type} = {level}")
+                if attack_type != "ALL":
+                    last_status = await db.get_last_status(region=region_name, attack_type=attack_type, is_bot=is_bot)
+                    if last_status == status:
+                        logger.info(f"[LSNR] Repeat (skipped): {region_name} {attack_type} = {status}")
                         continue
                 
-                    await db.save_attack(region=regname, attack_type=danger_type, status=level, source=source, is_bot=is_bot)
-                    # logger.info(f"[LSNR] Updated: {regname} {danger_type} = {level}")
+                    await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
                     await db.update_region(region_name)
 
-                    users = await db.get_users_by_region(region=regname, is_bot=is_bot)
+                    users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                     if not users:
-                        logger.info(f"[LSNR] No subscribers for region {regname}")
+                        logger.info(f"[LSNR] No subscribers for region {region_name}")
                         continue
 
-                    text = format_notification(regname, danger_type, level, source)
+                    text = format_notification(region_name, attack_type, status, source, comment)
                     for user_id in users:
                         try:
-                            await bot.send_message(chat_id=user_id, text=text)
+                            await bot.send_message(chat_id=user_id, text=text, parse_mode="HTML")
                             await asyncio.sleep(0.05)
                         except Exception as e:
                             logger.error(f"[LSNR] Error sending to user {user_id}", exc_info=True)
-                elif danger_type == "ALL":
-                    for dantype in ["UAV", "AIR", "ROCKET", "UB"]:
-                        last_status = await db.get_last_status(region=regname, attack_type=dantype, is_bot=is_bot)
-                        if last_status == level:
-                            logger.info(f"[LSNR] Repeat (skipped): {regname} {dantype} = {level}")
+                elif attack_type == "ALL":
+                    for attack_type in ["UAV", "AIR", "ROCKET", "UB"]:
+                        last_status = await db.get_last_status(region=region_name, attack_type=attack_type, is_bot=is_bot)
+                        if last_status == status:
+                            logger.info(f"[LSNR] Repeat (skipped): {region_name} {attack_type} = {status}")
                             continue
                 
-                        await db.save_attack(region=regname, attack_type=dantype, status=level, source=source, is_bot=is_bot)
-                        # logger.info(f"[LSNR] Updated: {regname} {dantype} = {level}")
+                        await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
                         await db.update_region(region_name)
 
-                        users = await db.get_users_by_region(region=regname, is_bot=is_bot)
+                        users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
                         if not users:
                             continue
 
-                        text = format_notification(regname, dantype, level, source)
+                        text = format_notification(region_name, attack_type, status, source, comment)
                         for user_id in users:
                             try:
-                                await bot.send_message(chat_id=user_id, text=text)
+                                await bot.send_message(chat_id=user_id, text=text, parse_mode="HTML")
                                 await asyncio.sleep(0.05)
                             except Exception as e:
                                 logger.error(f"[TG/LSNR] Error sending to user {user_id}", exc_info=True)
