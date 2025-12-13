@@ -81,11 +81,11 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         original_message = data["original_message"]
 
         if action == "approve":
-            await query.edit_message_text(f"🆔 User ID: <code>{TEMP_USER_ID}</code>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={TEMP_USER_ID}'>{TEMP_USER_ID}</a>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} approved message in /report (msg_id: {msg_id})")
             await process_message(message=original_message, source="radaronebot (/report)", is_bot=True)
         elif action == "reject":
-            await query.edit_message_text(f"🆔 User ID: <code>{TEMP_USER_ID}</code>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n❌ Message has been rejected.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={TEMP_USER_ID}'>{TEMP_USER_ID}</a>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n❌ Message has been rejected.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} rejected message in /report (msg_id: {msg_id})")
         else:
             await query.edit_message_text("❓ Unsupported action.")
@@ -310,7 +310,7 @@ async def handle_report_response(update: Update, context: ContextTypes.DEFAULT_T
     await context.bot.send_message(
         admin_user_id,
         text=(
-            f"🆔 User ID: <code>{user_id}</code>\n"
+            f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n"
             f"⌛️ Sending time: <code>{message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')}</code>"
         ),
         reply_markup=InlineKeyboardMarkup(approval_buttons),
@@ -372,11 +372,13 @@ async def admin_is_banned(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = " ".join(context.args).split(";", 1)
+    message = user_answer[0].replace("\\n", "\n")
+    comment = user_answer[1].replace("\\n", "\n") if user_answer[1] else None
     if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_report without admin permissions.")
         return
     try:
-        await process_message(message=user_answer[0], source="Admin", comment=user_answer[1], is_bot=True)
+        await process_message(message=message, source="Admin", comment=comment, is_bot=True)
         logger.info(f"[BOT] Admin {update.effective_user.id} sent report via /admin_report.")
     except Exception as e:
         logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send report via /admin_report but something went wrong", exc_info=True)
@@ -387,7 +389,7 @@ async def admin_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     try:
         if context.args:
-            message = " ".join(context.args)
+            message = " ".join(context.args).replace("\\n", "\n")
             for user_id in await db.get_all_users(is_bot=True):
                 await context.bot.send_message(chat_id=user_id, text=f"<b>🔔 ВНИМАНИЕ!</b>\n💬 Сообщение от администратора:\n<blockquote>{message}</blockquote>", parse_mode="HTML")
                 logger.info(f"[BOT] Admin {update.effective_user.id} sent message to all users via /admin_message.")
