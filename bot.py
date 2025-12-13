@@ -15,9 +15,6 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 REPORT_WAITING = 1
 REGIONS_PER_PAGE = 10
 
-TEMP_USER_ID = None
-TEMP_TIMESTAMP = None
-
 async def send_region_page(update: Update, context: ContextTypes.DEFAULT_TYPE, page = 0, array = region_names, command = "subscribe", last_command = "`/subscribe all` - подписаться на все регионы"):
     total_pages = (len(array) - 1) // REGIONS_PER_PAGE + 1
     start = page * REGIONS_PER_PAGE
@@ -72,20 +69,29 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     if query.data.startswith("approve_") or query.data.startswith("reject_"):
         action, msg_id = query.data.split("_", 1)
         msg_key = f"report_{msg_id}"
+        data = context.bot_data.get(msg_key)
+        user_id = data["original_user_id"]
+        timestamp = data["timestamp"]
 
-        if msg_key not in context.bot_data:
+        if not data:
             await query.edit_message_text("⚠️ Не удалось найти сообщение.")
             return
 
-        data = context.bot_data.pop(msg_key)
+        if data.get("handled"):
+            await query.answer(text="⚠️ Это сообщение уже было обработано другим администратором.", show_alert=True)
+            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n⌛️ Sending time: <code>{timestamp}</code>\n⚠️ Это сообщение уже было обработано другим администратором.", parse_mode="HTML")
+            return
+        
+        data["handled"] = True
+        context.bot_data[msg_key] = data
         original_message = data["original_message"]
 
         if action == "approve":
-            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={TEMP_USER_ID}'>{TEMP_USER_ID}</a>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n⌛️ Sending time: <code>{timestamp}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} approved message in /report (msg_id: {msg_id})")
             await process_message(message=original_message, source="radaronebot (/report)", is_bot=True)
         elif action == "reject":
-            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={TEMP_USER_ID}'>{TEMP_USER_ID}</a>\n⌛️ Sending time: <code>{TEMP_TIMESTAMP}</code>\n❌ Message has been rejected.", parse_mode="HTML")
+            await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n⌛️ Sending time: <code>{timestamp}</code>\n❌ Message has been rejected.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} rejected message in /report (msg_id: {msg_id})")
         else:
             await query.edit_message_text("❓ Unsupported action.")
@@ -289,38 +295,36 @@ async def handle_report_response(update: Update, context: ContextTypes.DEFAULT_T
     user_id = update.effective_user.id
     message_time = update.message.date
 
-    admin_user_id = os.getenv("ADMIN_USER_ID")
+    admin_user_ids = os.getenv("ADMIN_USER_ID").split(",")
 
-    forwarded_message = await context.bot.forward_message(
-        chat_id=admin_user_id,
-        from_chat_id=update.effective_chat.id,
-        message_id=update.message.message_id
-    )
+    for admin_user_id in admin_user_ids:
+        forwarded_message = await context.bot.forward_message(
+            chat_id=admin_user_id,
+            from_chat_id=update.effective_chat.id,
+            message_id=update.message.message_id
+        )
 
-    context.bot_data[f"report_{forwarded_message.message_id}"] = {
-        "original_user_id": user_id,
-        "original_message": update.message
-    }
+        context.bot_data[f"report_{forwarded_message.message_id}"] = {
+            "original_user_id": user_id,
+            "original_message": user_message,
+            "timestamp": message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y'),
+            "handled": False
+        }
 
-    approval_buttons = [
-        [InlineKeyboardButton("✅ Approve", callback_data=f"approve_{forwarded_message.message_id}")],
-        [InlineKeyboardButton("❌ Reject", callback_data=f"reject_{forwarded_message.message_id}")]
-    ]
+        approval_buttons = [
+            [InlineKeyboardButton("✅ Approve", callback_data=f"approve_{forwarded_message.message_id}")],
+            [InlineKeyboardButton("❌ Reject", callback_data=f"reject_{forwarded_message.message_id}")]
+        ]
 
-    await context.bot.send_message(
-        admin_user_id,
-        text=(
-            f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n"
-            f"⌛️ Sending time: <code>{message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')}</code>"
-        ),
-        reply_markup=InlineKeyboardMarkup(approval_buttons),
-        parse_mode="HTML"
-    )
-
-    global TEMP_USER_ID
-    global TEMP_TIMESTAMP
-    TEMP_USER_ID = user_id
-    TEMP_TIMESTAMP = message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')
+        await context.bot.send_message(
+            admin_user_id,
+            text=(
+                f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n"
+                f"⌛️ Sending time: <code>{message_time.astimezone(pytz.timezone("Europe/Moscow")).strftime('%H:%M:%S %d-%m-%Y')}</code>"
+            ),
+            reply_markup=InlineKeyboardMarkup(approval_buttons),
+            parse_mode="HTML"
+        )
 
     await update.message.reply_text("✅ Ваше сообщение отправлено на проверку.")
     logger.info(f"[BOT] User {update.effective_user.id}'s message has been sent for verification to admin.")
