@@ -1,0 +1,13 @@
+openai
+ollama
+dotenv
+bs4
+requests
+telegram
+python-telegram-bot
+pytz
+fastapi
+uvicorn[standard]
+uvicorn
+websockets
+asyncpg

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Radar ONE | Онлайн-Карта</title>
+  <meta name="title" content="Radar ONE | Онлайн-Карта">
+  <meta name="description" content="Интерактивная онлайн-карта угроз атак врага на регионы России в реальном времени.">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/justarist/radarone/refs/heads/main/images/icons/logo.webp">
+  <link rel="alternate" hreflang="x-default" href="https://radarone.online/">
+  <link rel="alternate" hreflang="ru" href="https://radarone.online/">
+  <link rel="alternate" hreflang="en" href="https://radarone.online/en">
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="menu-toggle" class="menu-toggle">
+    <span class="material-symbols-outlined icon-xl"> menu </span>
+  </div>
+
+  <div id="side-menu" class="side-menu">
+    <div class="menu-header">
+      <button id="close-menu" class="close-menu">
+        <span class="material-symbols-outlined icon-lg"> close </span>
+      </button>
+    </div>
+
+    <div class="menu-title">Наши социальные сети</div>
+    <div class="menu-socials">
+      <a href="https://t.me/radaroneteam" class="card"><img src="/images/icons/telegram.svg"></a>
+      <a href="https://t.me/radaronebot" class="card"><img src="/images/icons/telegram-bot.svg"></a>
+      <a href="https://github.com/justarist/radarone" class="card"><img src="/images/icons/github.svg"></a>
+    </div> 
+
+    <div class="menu-section">
+      <a class="menu-item" href="https://t.me/radaronebot">⚠️ Сообщить об угрозе/атаке</a>
+      <a class="menu-item" href="mailto://contact@radarone.online">✉️ Написать нам e-mail</a>
+      <a class="menu-item" href="https://github.com/justarist/radarone/blob/main/LICENSE">📜 Лицензия</a>
+    </div>
+
+    <div class="menu-title">Поддержите проект донатом</div>
+    <div class="menu-socials">
+      <a class="card" href="https://boosty.to/justarist" style="color: inherit; text-decoration: none;"><img src="/images/icons/boosty.svg" type="image/svg+xml" width="30" height="30" alt="Boosty">Boosty</a>
+      <a class="card" href="https://donationalerts.com/r/justarist" style="color: inherit; text-decoration: none;"><img src="/images/icons/donationalerts.svg" type="image/svg+xml" width="30" height="30" alt="DAlerts">DAlerts</a>
+    </div>
+    <br>
+    <div class="menu-socials">
+      <a class="card" href="https://ko-fi.com/justarist" style="color: inherit; text-decoration: none;"><img src="/images/icons/ko-fi.svg" type="image/svg+xml" width="30" height="30" alt="Ko-Fi">Ko-Fi</a>
+      <a class="card" href="https://patreon.com/justarist" style="color: inherit; text-decoration: none;"><img src="/images/icons/patreon.svg" type="image/svg+xml" width="30" height="30" alt="Patreon">Patreon</a>
+    </div>
+
+    <div class="menu-title">Установите наше приложение<br>(На данный момент в разработке)</div>
+    <div class="menu-socials">
+      <a class="card" href="#" style="color: inherit; text-decoration: none;"><img src="/images/icons/google-play.svg" type="image/svg+xml" width="30" height="30" alt="Google Play">Google Play</a>
+      <a class="card" href="#" style="color: inherit; text-decoration: none;"><img src="/images/icons/app-store.svg" type="image/svg+xml" width="30" height="30" alt="App Store">App Store</a>
+    </div>
+  </div>
+
+  <div id="notification-container"></div>
+
+  <div id="map"></div>
+
+  <script type="module" src="./js/main.js"></script>
+
+</body>
+</html>
