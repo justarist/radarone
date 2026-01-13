@@ -42,7 +42,7 @@ Radar ONE собирает сообщения из публичных Telegram
 | **Подписки по регионам** | Telegram‑бот сохраняет подписки в таблице `subscriptions`. |
 | **Интерактивная карта** | Frontend (MapLibre GL) отображает статус каждой области, меняет цвет в зависимости от уровня угрозы. |
 | **WebSocket‑интерфейс** | Пакеты `snapshot` (полный статус) и `region_update` (обновление отдельного региона). |
-| **Уведомления в Telegram** | Форматированный HTML‑сообщения (`notifications.format_notification`). |
+| **Уведомления в Telegram** | Форматированные HTML‑сообщения (`notifications.format_notification`). |
 | **Управление пользователями** | Администраторы (переменная `ADMIN_USER_ID`) могут банить/разбанивать, рассылать сообщения, публиковать отчёты. |
 | **Логирование** | `logger.py` пишет в консоль и в файлы `logs/radarone.log` (ежедневная ротация, 30 дней). |
 | **Docker‑композит** | Один `docker-compose.yml` разворачивает backend, frontend, Nginx‑reverse‑proxy, PostgreSQL и Portainer. |
