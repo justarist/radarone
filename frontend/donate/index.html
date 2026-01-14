@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Support us!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1b1f23;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            background: #3c3f47;
+            color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .buttons {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .icon {
+            filter: brightness(0) invert(1);
+        }
+        .btn {
+            text-decoration: none;
+            padding: 18px 25px;
+            font-size: 18px;
+            border-radius: 10px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .btn i {
+            font-size: 22px;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            opacity: 0.9;
+        }
+
+        .donationalerts { background: #ff9700; }
+        .patreon { background: #ff424d; }
+        .kofi { background: #29abe0; }
+        .boosty { background: #f15f2c; }
+        .github { background: #4479c5; }
+        .github-repo { background: #5fc647; }
+
+        footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
+        code {
+            text-decoration: none;
+            cursor: pointer;
+        }
+        code:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 25px 20px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            .buttons {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin-top: 30px;
+            }
+
+            .btn {
+                font-size: 16px;
+                padding: 16px;
+            }
+
+            .btn i,
+            .btn img {
+                width: 24px;
+                height: 24px;
+                font-size: 20px;
+            }
+
+            footer {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 data-i18n="title"></h1>
+        <p data-i18n="description"></p>
+
+        <div class="buttons">
+            <a class="btn donationalerts" href="https://www.donationalerts.com/r/justarist" target="_blank">
+                <img src="/images/icons/donationalerts.svg" class="icon" type="image/svg+xml" width="30" height="30" fill="currentColor" alt="DonationAlerts">
+                DonationAlerts
+            </a>
+
+            <a class="btn patreon" href="https://www.patreon.com/justarist" target="_blank">
+                <i class="fa-brands fa-patreon"></i>
+                Patreon
+            </a>
+
+            <a class="btn kofi" href="https://ko-fi.com/justarist" target="_blank">
+                <i class="fa-solid fa-mug-hot"></i>
+                Ko-fi
+            </a>
+
+            <a class="btn boosty" href="https://boosty.to/justarist" target="_blank">
+                <img src="/images/icons/boosty.svg" class="icon" type="image/svg+xml" width="30" height="30" fill="currentColor" alt="Boosty">
+                Boosty
+            </a>
+        </div>
+
+        <p>
+            <span data-i18n="crypto_description"></span>
+            <br>BTC: <code id="btc" class="code" style="cursor:pointer;">bc1ql4tm6a8ae9vl0zq6cyjy03gsma7yf5fagggk8p</code>
+            <br>TON: <code id="ton" class="code" style="cursor:pointer;">UQBH80WEME1KhBqWRyC8H5RBFSOJ8CAWKaj6_5lxa4b_LBG0</code>
+        </p>
+        <hr>
+        <p data-i18n="github_description"></p>
+        <div class="buttons">
+            <a class="btn github" href="https://github.com/justarist" target="_blank">
+                <img src="/images/icons/github.svg" class="icon" type="image/svg+xml" width="30" height="30" fill="currentColor" alt="GitHub">
+                GitHub
+            </a>
+
+            <a class="btn github-repo" href="https://github.com/justarist/radarone" target="_blank">
+                <i class="fa-brands fa-github"></i>
+                GitHub Repo
+            </a>
+        </div>
+
+        <footer>
+            Thank you for your support! 💖
+        </footer>
+    </div>
+    <script>
+        document.getElementById("btc").onclick = function () {
+            navigator.clipboard.writeText(this.innerText);
+            alert("BTC address copied!");
+        };
+        document.getElementById("ton").onclick = function () {
+            navigator.clipboard.writeText(this.innerText);
+            alert("TON address copied!");
+        };
+        const translations = {
+            en: {
+                title: "Support Us ❤️",
+                description: "If you like our content and want to help us grow, you can support us through any of the platforms below.",
+                footer: "Thank you for your support! 💖",
+                crypto_description: "Also you can donate with crypto:",
+                github_description: "You can also support us by starring our GitHub repository and following us."
+            },
+            ru: {
+                title: "Поддержите нас ❤️",
+                description: "Если вам нравится наш контент и вы хотите помочь проекту развиваться, вы можете поддержать нас на любой из платформ ниже.",
+                footer: "Спасибо за вашу поддержку! 💖",
+                crypto_description: "Также вы можете пожертвовать криптовалютой:",
+                github_description: "Вы также можете поддержать нас, поставив звездочку нашему репозиторию на GitHub и подписавшись на нас."
+            }
+        };
+        const userLang = navigator.language.slice(0, 2);
+        const lang = translations[userLang] ? userLang : "en";
+
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.dataset.i18n;
+            el.textContent = translations[lang][key];
+            el.lang = lang;
+        });
+    </script>
+</body>
+</html>
+
