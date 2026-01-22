@@ -25,9 +25,18 @@ def get_last_message(channel_name: str):
     response.raise_for_status()
     soup = BeautifulSoup(response.text, "html.parser")
     messages = soup.find_all("div", class_="tgme_widget_message_text")
+    channel_name = soup.find_all("div", class_="tgme_channel_info_header_title")
     if not messages:
         return None
-    return messages[-1].get_text("\n", strip=True)
+    if not channel_name:
+        return {
+            "last_message": messages[-1].get_text("\n", strip=True),
+            "channel_name": "<неизвестно>"
+        }
+    return {
+        "last_message": messages[-1].get_text("\n", strip=True),
+        "channel_name": channel_name.get_text("\n", strip=True)
+    }
 
 async def process_message(message: str, source: str = "<неизвестно>", comment: str = None, is_bot: bool = False):
     try:
@@ -54,14 +63,14 @@ async def process_message(message: str, source: str = "<неизвестно>", 
             if region_name not in region_names:
                 logger.warning(f"[LSNR] Unknown region: {region_name}")
                 continue
-        
+
         if region_name != "Россия":
             if attack_type != "ALL":
                 last_status = await db.get_last_status(region=region_name, attack_type=attack_type, is_bot=is_bot)
                 if last_status == status:
                     logger.info(f"[LSNR] Repeat (skipping): {region_name} {attack_type} = {status}")
                     continue
-            
+
                 await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
 
                 users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
@@ -81,7 +90,7 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                     if last_status == status:
                         logger.info(f"[LSNR] Repeat (skipping): {region_name} {attack_type} = {status}")
                         continue
-            
+
                     await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
 
                     users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
@@ -105,7 +114,7 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                     if last_status == status:
                         logger.info(f"[LSNR] Repeat (skipped): {region_name} {attack_type} = {status}")
                         continue
-                
+
                     await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
 
                     users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
@@ -126,7 +135,7 @@ async def process_message(message: str, source: str = "<неизвестно>", 
                         if last_status == status:
                             logger.info(f"[LSNR] Repeat (skipped): {region_name} {attack_type} = {status}")
                             continue
-                
+
                         await db.save_attack(region=region_name, attack_type=attack_type, status=status, source=source, is_bot=is_bot)
 
                         users = await db.get_users_by_region(region=region_name, is_bot=is_bot)
@@ -160,3 +169,4 @@ async def listener_loop(poll_interval: int = 10):
             except Exception as e:
                 logger.error(f"[LSNR] Error while processing message from {channel}", exc_info=True)
         await asyncio.sleep(poll_interval)
+
