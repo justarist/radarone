@@ -96,6 +96,9 @@ async def handle_attack_update(
     comment: Optional[str],
     is_bot: bool,
 ):
+    if region not in REGIONS or attack_type not in ATTACK_TYPES:
+        return
+
     last_status = await db.get_last_status(
         region=region,
         attack_type=attack_type,
