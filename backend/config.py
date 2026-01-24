@@ -93,7 +93,6 @@ REGIONS = {
 
 TELEGRAM_CHANNELS = {
     "radarrussiia",
-    "bidengoy",
     "RDFradar",
     "lpr1_Kherson_alarm",
     "lpr1_LDPR_alarm"
