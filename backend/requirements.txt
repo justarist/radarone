@@ -2,7 +2,7 @@ openai
 ollama
 dotenv
 bs4
-requests
+aiohttp
 telegram
 python-telegram-bot
 pytz

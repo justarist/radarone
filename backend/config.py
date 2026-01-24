@@ -1,4 +1,4 @@
-region_names = [
+REGIONS = {
     "Республика Адыгея",
     "Республика Алтай",
     "Республика Башкортостан",
@@ -89,12 +89,33 @@ region_names = [
     "Донецкая Народная Республика",
     "Луганская Народная Республика",
     "Россия"
-]
+}
 
-telegram_channels = [
+TELEGRAM_CHANNELS = {
     "radarrussiia",
     "bidengoy",
     "RDFradar",
-    "lpr1_Kherson_alarm"
-    #"lpr1_LDPR_alarm"
-]
+    "lpr1_Kherson_alarm",
+    "lpr1_LDPR_alarm"
+}
+
+BANWORDS = {
+    "силами противовоздушной обороны",
+    "Движение автотранспорта",
+    "чп москва",
+    "поздравляем",
+    "аэропорт"
+}
+
+ATTACK_TYPES = {"UAV", "AIR", "ROCKET", "UB", "ALL"}
+EXPANDED_ATTACK_TYPES = {"UAV", "AIR", "ROCKET", "UB"}
+
+UB_ALLOWED_REGIONS = {
+    "Республика Крым",
+    "Севастополь",
+    "Краснодарский край",
+    "Херсонская область",
+    "Запорожская область",
+    "Донецкая Народная Республика",
+    "Ростовская область",
+}
