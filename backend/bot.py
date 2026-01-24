@@ -89,7 +89,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         if action == "approve":
             await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n⌛️ Sending time: <code>{timestamp}</code>\n✅ Message has been approved and will be used by the system.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} approved message in /report (msg_id: {msg_id})")
-            await process_message(message=original_message, source="radaronebot (/report)", is_bot=True)
+            await process_message(message=original_message, channel_name="Admin", source="radaronebot (/report)", is_bot=True)
         elif action == "reject":
             await query.edit_message_text(f"🆔 User ID: <a href='tg://user?id={user_id}'>{user_id}</a>\n⌛️ Sending time: <code>{timestamp}</code>\n❌ Message has been rejected.", parse_mode="HTML")
             logger.info(f"[BOT] Admin {update.effective_user.id} rejected message in /report (msg_id: {msg_id})")
@@ -382,7 +382,7 @@ async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_report without admin permissions.")
         return
     try:
-        await process_message(message=message, source="Admin", comment=comment, is_bot=True)
+        await process_message(message=message, channel_name="Admin", source="Admin", comment=comment, is_bot=True)
         logger.info(f"[BOT] Admin {update.effective_user.id} sent report via /admin_report.")
     except Exception as e:
         logger.error(f"[BOT] Admin {update.effective_user.id} attempted to send report via /admin_report but something went wrong", exc_info=True)
