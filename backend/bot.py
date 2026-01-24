@@ -1,6 +1,6 @@
 from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, ConversationHandler, filters
-from config import region_names, telegram_channels
+from config import REGIONS, TELEGRAM_CHANNELS
 from dotenv import load_dotenv
 from logger import logger
 import os
@@ -15,7 +15,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 REPORT_WAITING = 1
 REGIONS_PER_PAGE = 10
 
-async def send_region_page(update: Update, context: ContextTypes.DEFAULT_TYPE, page = 0, array = region_names, command = "subscribe", last_command = "`/subscribe all` - подписаться на все регионы"):
+async def send_region_page(update: Update, context: ContextTypes.DEFAULT_TYPE, page = 0, array = REGIONS, command = "subscribe", last_command = "`/subscribe all` - подписаться на все регионы"):
     total_pages = (len(array) - 1) // REGIONS_PER_PAGE + 1
     start = page * REGIONS_PER_PAGE
     end = start + REGIONS_PER_PAGE
@@ -111,7 +111,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     if command == "subscribe":
-        await send_region_page(update, context, page, region_names, "subscribe", "`/subscribe all` - подписаться на все регионы")
+        await send_region_page(update, context, page, REGIONS, "subscribe", "`/subscribe all` - подписаться на все регионы")
     elif command == "unsubscribe":
         subscriptions = await db.get_subscriptions(user_id=update.effective_user.id, is_bot=True)
         if not subscriptions:
@@ -119,7 +119,7 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
             return
         await send_region_page(update, context, page, subscriptions, "unsubscribe", "`/unsubscribe all` - отписаться от всех регионов")
     elif command == "status":
-        await send_region_page(update, context, page, region_names, "status", "")
+        await send_region_page(update, context, page, REGIONS, "status", "")
 
 async def _set_commands(app):
     commands = [
@@ -162,12 +162,12 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):  
     if context.args:
         region = " ".join(context.args)
-        if region not in region_names:
-            for i in range(len(region_names)):
-                if region.lower() in (region_names[i]).lower():
-                    region = region_names[i]
+        if region not in REGIONS:
+            for i in range(len(REGIONS)):
+                if region.lower() in (REGIONS[i]).lower():
+                    region = REGIONS[i]
                     break
-            if region not in region_names:
+            if region not in REGIONS:
                 logger.warning(f"[BOT] User {update.effective_user.id} requested unknown region: {region}")
                 await update.message.reply_text("⚠ Регион не найден. Используй официальное название.")
                 return
@@ -184,24 +184,24 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"[BOT] User {update.effective_user.id} requested status for {region}")
         await update.message.reply_text("\n".join(reply))
         return
-    
-    await send_region_page(update, context, 0, region_names, "status", "")
+
+    await send_region_page(update, context, 0, REGIONS, "status", "")
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if " ".join(context.args) == "all":
-        for region in region_names:
+        for region in REGIONS:
             if region != "Россия": added = await db.add_subscription(user_id=update.effective_user.id, region=region, use_logger=False, is_bot=True)
         logger.info(f"[BOT] User {update.effective_user.id} subscribed to all regions")
         await update.message.reply_text(f"✅ Ты подписался на все регионы")
         return
     elif context.args:
         region = " ".join(context.args)
-        if region not in region_names:
-            for i in range(len(region_names)):
-                if region.lower() in (region_names[i]).lower():
-                    region = region_names[i]
+        if region not in REGIONS:
+            for i in range(len(REGIONS)):
+                if region.lower() in (REGIONS[i]).lower():
+                    region = REGIONS[i]
                     break
-            if region not in region_names:
+            if region not in REGIONS:
                 logger.warning(f"[BOT] User {update.effective_user.id} attempted to subscribe to a non-existent region: {region}")
                 await update.message.reply_text("⚠ Регион не найден. Используй официальное название.")
                 return
@@ -225,10 +225,10 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     elif context.args:
         region = " ".join(context.args)
-        if region not in region_names:
-            for i in range(len(region_names)):
-                if region.lower() in (region_names[i]).lower():
-                    region = region_names[i]
+        if region not in REGIONS:
+            for i in range(len(REGIONS)):
+                if region.lower() in (REGIONS[i]).lower():
+                    region = REGIONS[i]
                     break
         await db.remove_subscription(user_id=update.effective_user.id, region=region, is_bot=True)
         await update.message.reply_text(f"❌ Подписка на {region} отменена")
@@ -264,7 +264,7 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def channels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = "💬 Телеграм-каналы, сообщения из которых используются для анализа и оповещения пользователей:\n"
-    for ch in telegram_channels: text += f"    ➽ @{ch}\n"
+    for ch in TELEGRAM_CHANNELS: text += f"    ➽ @{ch}\n"
     await update.message.reply_text(text, parse_mode="HTML")
     logger.info(f"[BOT] User {update.effective_user.id} called /channels")
 
