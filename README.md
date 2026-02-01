@@ -27,7 +27,7 @@
 ## 🌐 Overview  
 
 Radar ONE collects messages from public Telegram channels reporting air, missile, and other threats.  
-Messages are processed via an LLM model (OpenAI GPT o1‑mini **or** Ollama), extracting:
+Messages are processed via an LLM model (OpenAI GPT o3‑mini **or** Ollama), extracting:
 
 * **Region** – exact official name of a Russian federal subject.  
 * **Threat Type** – `UAV` (drone attack), `AIR` (air threat), `ROCKET` (missile threat), `UB` (unmanned boat attack), or `ALL`.  
@@ -56,10 +56,10 @@ Extracted data is stored in PostgreSQL and delivered to subscribers via:
 
 ```
 +-------------------+        +------------------+        +--------------------+
-| Telegram channels |  --->  |    listener.py   |  --->  |    analyzer.py     |
+| Telegram channels |  --->  |    listener.py   |  <-->  |    analyzer.py     |
 +-------------------+        +------------------+        +--------------------+
-                                      |                            |
-                                      v                            v
+                                      |                            
+                                      v                            
                              +------------------+        +---------+----------+
                              |    PostgreSQL    | <----> |   db.py (asyncpg)  |
                              +------------------+        +---------+----------+
@@ -191,7 +191,7 @@ OLLAMA_MODEL=gemma:2b  # example, can be any available
 | `DB_*` | PostgreSQL connection parameters. |
 | `BOT_TOKEN` | Telegram bot token (for notifications & admin commands). |
 | `ADMIN_USER_ID` | Comma-separated list of admin Telegram IDs. |
-| `OPENAI_API_KEY` | OpenAI key (if using GPT‑o1‑mini). |
+| `OPENAI_API_KEY` | OpenAI key (if using GPT‑o3‑mini). |
 | `OLLAMA_API_KEY` | Ollama cloud access token. |
 | `OLLAMA_MODEL` | Ollama model name, e.g., `gemma:2b` or `llama3`. |
 
