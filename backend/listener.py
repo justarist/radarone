@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 from typing import Optional, Iterable
 from bs4 import BeautifulSoup
-from config import TELEGRAM_CHANNELS, REGIONS, BANWORDS, ATTACK_TYPES, EXPANDED_ATTACK_TYPES, UB_ALLOWED_REGIONS
+from config import TELEGRAM_CHANNELS, REGIONS, BANWORDS, ATTACK_TYPES, EXPANDED_ATTACK_TYPES, UB_ALLOWED_REGIONS, ALL_AC_EXCLUDED_REGIONS
 import db
 from analyzer import analyze_message
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
@@ -57,7 +57,7 @@ def expand_targets(region: str, attack_type: str, status: str) -> Iterable[tuple
             targets.append((region, attack_type))
     elif region == "Россия" and status == "AC":
         for r in REGIONS:
-            if r == "Россия":
+            if r in ALL_AC_EXCLUDED_REGIONS:
                 continue
             if attack_type == "ALL":
                 targets.extend((r, at) for at in EXPANDED_ATTACK_TYPES)
