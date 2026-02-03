@@ -93,7 +93,6 @@ REGIONS = {
 
 TELEGRAM_CHANNELS = {
     "radarrussiia",
-    "bidengoy",
     "RDFradar",
     "lpr1_Kherson_alarm",
     "lpr1_LDPR_alarm"
@@ -105,7 +104,9 @@ BANWORDS = {
     "чп москва",
     "поздравляем",
     "аэропорт",
-    "спасибо"
+    "спасибо",
+    "собрано",
+    "участие в сборе"
 }
 
 ATTACK_TYPES = {"UAV", "AIR", "ROCKET", "UB", "ALL"}
