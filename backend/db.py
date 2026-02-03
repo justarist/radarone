@@ -6,6 +6,7 @@ from telegram import Bot
 import asyncpg
 from logger import logger
 from dotenv import load_dotenv
+from config import EXPANDED_ATTACK_TYPES, REGIONS
 
 load_dotenv()
 
@@ -110,6 +111,8 @@ async def get_pool(is_bot: bool = False) -> asyncpg.Pool:
 async def save_attack(region: str, attack_type: str, status: str, source: str = "manual", use_logger: bool = True, is_bot: bool = False):
     pool = await get_pool(is_bot=is_bot)
     timestamp = datetime.now(pytz.timezone("Europe/Moscow")).strftime("%H:%M:%S %d-%m-%Y")
+    if region not in REGIONS or attack_type not in EXPANDED_ATTACK_TYPES:
+        return
     async with pool.acquire() as conn:
         await conn.execute(
             "INSERT INTO attacks (region, attack_type, status, source, timestamp) VALUES ($1, $2, $3, $4, $5)",
@@ -164,6 +167,8 @@ async def get_last_status(region: str, attack_type: str = None, use_logger: bool
 
 async def add_subscription(user_id: int, region: str, use_logger: bool = True, is_bot: bool = False) -> bool:
     pool = await get_pool(is_bot=is_bot)
+    if region not in REGIONS:
+        return
     async with pool.acquire() as conn:
         result = await conn.execute(
             "INSERT INTO subscriptions (user_id, region) VALUES ($1, $2) ON CONFLICT DO NOTHING",
