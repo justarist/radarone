@@ -51,6 +51,7 @@ def expand_targets(region: str, attack_type: str, status: str) -> Iterable[tuple
     if region != "Россия":
         if attack_type == "ALL" and status == "AC":
             targets.extend((region, at) for at in EXPANDED_ATTACK_TYPES)
+        elif attack_type == "ALL" and status != "AC": return
         else:
             if attack_type == "UB" and region not in UB_ALLOWED_REGIONS:
                 return []
@@ -96,7 +97,7 @@ async def handle_attack_update(
     comment: Optional[str],
     is_bot: bool,
 ):
-    if region not in REGIONS or attack_type not in ATTACK_TYPES:
+    if region not in REGIONS or attack_type not in EXPANDED_ATTACK_TYPES:
         return
 
     last_status = await db.get_last_status(
