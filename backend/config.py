@@ -1,4 +1,4 @@
-REGIONS = {
+REGIONS = [
     "Республика Адыгея",
     "Республика Алтай",
     "Республика Башкортостан",
@@ -89,16 +89,16 @@ REGIONS = {
     "Донецкая Народная Республика",
     "Луганская Народная Республика",
     "Россия"
-}
+]
 
-TELEGRAM_CHANNELS = {
+TELEGRAM_CHANNELS = [
     "radarrussiia",
     "RDFradar",
     "lpr1_Kherson_alarm",
     "lpr1_LDPR_alarm"
-}
+]
 
-BANWORDS = {
+BANWORDS = [
     "силами противовоздушной обороны",
     "Движение автотранспорта",
     "чп москва",
@@ -107,12 +107,12 @@ BANWORDS = {
     "спасибо",
     "собрано",
     "участие в сборе"
-}
+]
 
-ATTACK_TYPES = {"UAV", "AIR", "ROCKET", "UB", "ALL"}
-EXPANDED_ATTACK_TYPES = {"UAV", "AIR", "ROCKET", "UB"}
+ATTACK_TYPES = ["UAV", "AIR", "ROCKET", "UB", "ALL"]
+EXPANDED_ATTACK_TYPES = ["UAV", "AIR", "ROCKET", "UB"]
 
-UB_ALLOWED_REGIONS = {
+UB_ALLOWED_REGIONS = [
     "Республика Крым",
     "Севастополь",
     "Краснодарский край",
@@ -120,12 +120,12 @@ UB_ALLOWED_REGIONS = {
     "Запорожская область",
     "Донецкая Народная Республика",
     "Ростовская область"
-}
+]
 
-ALL_AC_EXCLUDED_REGIONS = {
+ALL_AC_EXCLUDED_REGIONS = [
     "Россия",
     "Херсонская область",
     "Запорожская область",
     "Донецкая Народная Республика",
     "Луганская Народная Республика"
-}
+]
