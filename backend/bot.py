@@ -377,7 +377,13 @@ async def admin_is_banned(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_answer = " ".join(context.args).split(";", 1)
     message = user_answer[0].replace("\\n", "\n")
-    comment = user_answer[1].replace("\\n", "\n") if user_answer[1] else None
+    try:
+        comment = user_answer[1].replace("\\n", "\n") if user_answer[1] else None
+    except IndexError:
+        comment = None
+    except Exception:
+        logger.warning(f"[BOT] Something went wrong with adding comment to notification", exc_info=True)
+        comment = None
     if str(update.effective_user.id) not in os.getenv("ADMIN_USER_ID").split(","):
         logger.warning(f"[BOT] User {update.effective_user.id} attempted to use /admin_report without admin permissions.")
         return

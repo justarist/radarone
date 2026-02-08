@@ -20,7 +20,9 @@ HEADERS = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/117.0 Safari/537.36"
-    )
+    ),
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
 }
 
 last_seen_messages = {}
@@ -51,7 +53,8 @@ def expand_targets(region: str, attack_type: str, status: str) -> Iterable[tuple
     if region != "Россия":
         if attack_type == "ALL" and status == "AC":
             targets.extend((region, at) for at in EXPANDED_ATTACK_TYPES)
-        elif attack_type == "ALL" and status != "AC": return
+        elif attack_type == "ALL" and status != "AC":
+            return []
         else:
             if attack_type == "UB" and region not in UB_ALLOWED_REGIONS:
                 return []
@@ -107,6 +110,7 @@ async def handle_attack_update(
     )
 
     if last_status == status:
+        logger.warning(f"Repeat, skipping ({status}/{region}/{attack_type})")
         return
 
     await db.save_attack(
@@ -135,6 +139,7 @@ async def get_last_message(channel: str, session: aiohttp.ClientSession) -> Opti
 
     messages = soup.select("div.tgme_widget_message_text")
     if not messages:
+        logger.warning(f"[LSNR] No messages found in {channel}")
         return None
 
     channel_title = soup.select_one("div.tgme_channel_info_header_title")
@@ -176,6 +181,9 @@ async def process_message(
             continue
 
         targets = expand_targets(region, attack_type, status)
+        if not targets:
+            logger.debug(f"[LSNR] No targets expanded: region={region}, type={attack_type}, status={status}")
+            continue
         for r, at in targets:
             await handle_attack_update(
                 region=r,
