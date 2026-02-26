@@ -3,7 +3,7 @@ from ollama import Client
 import openai
 import os
 from dotenv import load_dotenv
-from config import REGIONS, TELEGRAM_CHANNELS
+from config import ANALYZER_REGIONS, REGIONS, TELEGRAM_CHANNELS
 from logger import logger
 
 load_dotenv()
@@ -54,13 +54,13 @@ ALL - все опасности.
 {message}
 """
     if source and source in TELEGRAM_CHANNELS:
-        prompt = prompt.replace("$1", f"{", ".join(REGIONS[source])}\n")
-        if "Россия" in REGIONS[source]:
+        prompt = prompt.replace("$1", f"{", ".join(ANALYZER_REGIONS[source])}\n")
+        if "Россия" in ANALYZER_REGIONS[source]:
             prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
         else:
             prompt = prompt.replace("$2", "")
     else:
-        prompt = prompt.replace("$1", f"{", ".join(REGIONS["all"])}\n")
+        prompt = prompt.replace("$1", f"{", ".join(REGIONS)}\n")
         prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
 
     if channel_name and channel_name not in ["@radaronebot (/report)", "Admin"]: prompt = prompt.replace("$3", f"НАЗВАНИЕ ТЕЛЕГРАМ-КАНАЛА (используй для формирования более корректного названия): {channel_name}\n")
