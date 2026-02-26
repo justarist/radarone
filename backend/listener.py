@@ -161,9 +161,9 @@ async def process_message(
         return
 
     try:
-        result = analyze_message(message, channel_name=channel_name)
+        result = analyze_message(message, source=source, channel_name=channel_name)
     except Exception:
-        logger.error("[LSNR] Error while analyzing message")
+        logger.error("[LSNR] Error while analyzing message", exc_info=True)
         return
 
     for chunk in result.replace("\n", ",").split(","):
