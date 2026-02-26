@@ -23,8 +23,8 @@ def analyze_message(message: str, channel_name: str) -> str:
 Выводи точное официальное название субъекта Российской Федерации.  
 Если в сообщении указан город или населённый пункт, определи, к какому субъекту он относится, и выведи именно субъект РФ.  
 Разрешается использовать только следующие названия (в точности как написано, без изменений):  
-{", ".join(REGIONS[channel_name])}
 $1
+$2
 ТИП ОПАСНОСТИ:  
 Только одно из: UAV, AIR, ROCKET, UB, ALL
 
@@ -52,8 +52,11 @@ ALL - все опасности.
 Текст для анализа:  
 {message}
 """
-    if "Россия" in REGIONS[channel_name]: prompt = prompt.replace("$1", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
-    else: prompt = prompt.replace("$1", "")
+    if channel_name: prompt = prompt.replace("$1", f"{", ".join(REGIONS[channel_name])}\n")
+    else: prompt = prompt.replace("$1", f"{", ".join(REGIONS["all"])}\n")
+
+    if "Россия" in REGIONS[channel_name] or not channel_name: prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
+    else: prompt = prompt.replace("$2", "")
 
     try:
         openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
