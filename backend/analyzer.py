@@ -53,11 +53,15 @@ ALL - все опасности.
 Текст для анализа:  
 {message}
 """
-    if source and source in TELEGRAM_CHANNELS: prompt = prompt.replace("$1", f"{", ".join(REGIONS[source])}\n")
-    else: prompt = prompt.replace("$1", f"{", ".join(REGIONS["all"])}\n")
-
-    if "Россия" in REGIONS[source] or not source: prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
-    else: prompt = prompt.replace("$2", "")
+    if source and source in TELEGRAM_CHANNELS:
+        prompt = prompt.replace("$1", f"{", ".join(REGIONS[source])}\n")
+        if "Россия" in REGIONS[source]:
+            prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
+        else:
+            prompt = prompt.replace("$2", "")
+    else:
+        prompt = prompt.replace("$1", f"{", ".join(REGIONS["all"])}\n")
+        prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
 
     if channel_name and channel_name not in ["@radaronebot (/report)", "Admin"]: prompt = prompt.replace("$3", f"НАЗВАНИЕ ТЕЛЕГРАМ-КАНАЛА (используй для формирования более корректного названия): {channel_name}\n")
     else: prompt = prompt.replace("$3", "")
