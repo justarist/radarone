@@ -3,12 +3,12 @@ from ollama import Client
 import openai
 import os
 from dotenv import load_dotenv
-from config import REGIONS
+from config import REGIONS, TELEGRAM_CHANNELS
 from logger import logger
 
 load_dotenv()
 
-def analyze_message(message: str, channel_name: str) -> str:
+def analyze_message(message: str, source: str, channel_name: str) -> str:
     prompt = f"""
 Проанализируй следующий текст и выдай результат СТРОГО в формате:
 
@@ -28,6 +28,7 @@ $2
 ТИП ОПАСНОСТИ:  
 Только одно из: UAV, AIR, ROCKET, UB, ALL
 
+$3
 СОКРАЩЕНИЯ:
 UAV - беспилотный летательный аппарат, БПЛА  
 AIR - воздушная опасность  
@@ -46,17 +47,20 @@ ALL - все опасности.
 - Если написано "наблюдается сбитие", "пролетают" и т.п., то уровень HD.
 - Если сначала написано "БПЛА пролетают регион N", а затем "Регион M на подлете", то означает, что в обоих регионах атака БПЛА (UAV), при этом у региона М средняя опасность, у региона N - высокая
 - Если сообщение содержит формулировки вроде "тишина", "чистое небо", "регион чисто", "угрозы не фиксируются", "не фиксируем угроз", "угроз нет", трактовать это как AC (отсутствие угроз) и ALL (все угрозы), например AC/Брянская область/ALL.
-- Если формулировки вроде "тишина", "чистое небо", "регион чисто", "угрозы не фиксируются", "не фиксируем угроз", "угроз нет" указаны глобально ("по всей России", "угроз не фиксируется по стране") — выдать AC (отсутствие угроз) и ALL (все угрозы) для региона "Россия".
+- Если формулировки вроде "тишина", "чистое небо", "угрозы не фиксируются", "не фиксируем угроз", "угроз нет" указаны глобально ("по всей России", "угроз не фиксируется по стране") — выдать AC (отсутствие угроз) и ALL (все угрозы) для региона "Россия".
 - МВШ (малый воздушный шар) квалифицировать как Воздушную угрозу (AIR)
 
 Текст для анализа:  
 {message}
 """
-    if channel_name: prompt = prompt.replace("$1", f"{", ".join(REGIONS[channel_name])}\n")
+    if source and source in TELEGRAM_CHANNELS: prompt = prompt.replace("$1", f"{", ".join(REGIONS[source])}\n")
     else: prompt = prompt.replace("$1", f"{", ".join(REGIONS["all"])}\n")
 
-    if "Россия" in REGIONS[channel_name] or not channel_name: prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
+    if "Россия" in REGIONS[source] or not source: prompt = prompt.replace("$2", "Регион \"Россия\" использовать только при глобальных уведомлениях (например, \"по всей России\", \"угроз не фиксируется по стране\") и зачастую только для AC.\n")
     else: prompt = prompt.replace("$2", "")
+
+    if channel_name and channel_name not in ["@radaronebot (/report)", "Admin"]: prompt = prompt.replace("$3", f"НАЗВАНИЕ ТЕЛЕГРАМ-КАНАЛА (используй для формирования более корректного названия): {channel_name}\n")
+    else: prompt = prompt.replace("$3", "")
 
     try:
         openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
