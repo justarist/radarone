@@ -11,3 +11,4 @@ uvicorn[standard]
 uvicorn
 websockets
 asyncpg
+requests

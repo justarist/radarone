@@ -1,8 +1,14 @@
 import re
 import os
-import datetime
 import logging
+import requests
+from dotenv import load_dotenv
 from logging.handlers import TimedRotatingFileHandler
+
+load_dotenv()
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+LOGS_CHANNEL_ID = os.getenv("LOGS_CHANNEL_ID")
 
 log_dir = "logs"
 os.makedirs(log_dir, exist_ok=True)
@@ -22,6 +28,53 @@ class EmojiStripFilter(logging.Filter):
         if isinstance(record.msg, str):
             record.msg = EMOJI_PATTERN.sub("", record.msg)
         return True
+    
+class DiscordWebhookHandler(logging.Handler):
+    def __init__(self, webhook_url):
+        super().__init__()
+        self.webhook_url = webhook_url
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            
+            max_length = 1950 
+            if len(msg) > max_length:
+                msg = msg[:max_length] + "...\n[full in logs]"
+                
+            content = f"```text\n{msg}\n```"
+            payload = {
+                "content": content,
+                "username": "Radar ONE Logger"
+            }
+            
+            requests.post(self.webhook_url, json=payload, timeout=5)
+            
+        except Exception:
+            self.handleError(record)
+
+class TelegramHandler(logging.Handler):
+    def __init__(self, token, chat_id):
+        super().__init__()
+        self.token = token
+        self.chat_id = chat_id
+        self.api_url = f"https://api.telegram.org/bot{self.token}/sendMessage"
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            max_length = 4000
+            if len(msg) > max_length:
+                msg = msg[:max_length] + "...\n[full in logs]"
+            
+            payload = {
+                "chat_id": self.chat_id,
+                "text": f"<code>{msg}</code>",
+                "parse_mode": "HTML"
+            }
+            requests.post(self.api_url, json=payload, timeout=5)
+        except Exception:
+            self.handleError(record)
 
 def renamer(name):
     base, date = name.rsplit(".", 1)
@@ -48,6 +101,16 @@ file_handler.namer = renamer
 
 file_handler.setFormatter(formatter)
 file_handler.addFilter(EmojiStripFilter())
+
+if DISCORD_WEBHOOK_URL:
+    discord_handler = DiscordWebhookHandler(DISCORD_WEBHOOK_URL)
+    discord_handler.setFormatter(formatter)
+    logger.addHandler(discord_handler)
  
+if BOT_TOKEN and LOGS_CHANNEL_ID:
+    tg_handler = TelegramHandler(BOT_TOKEN, LOGS_CHANNEL_ID)
+    tg_handler.setFormatter(formatter)
+    logger.addHandler(tg_handler)
+
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
