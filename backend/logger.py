@@ -51,29 +51,6 @@ class DiscordWebhookHandler(logging.Handler):
         except Exception:
             self.handleError(record)
 
-class TelegramHandler(logging.Handler):
-    def __init__(self, token, chat_id):
-        super().__init__()
-        self.token = token
-        self.chat_id = chat_id
-        self.api_url = f"https://api.telegram.org/bot{self.token}/sendMessage"
-
-    def emit(self, record):
-        try:
-            msg = self.format(record)
-            max_length = 4000
-            if len(msg) > max_length:
-                msg = msg[:max_length] + "...\n[full in logs]"
-            
-            payload = {
-                "chat_id": self.chat_id,
-                "text": f"<code>{msg}</code>",
-                "parse_mode": "HTML"
-            }
-            requests.post(self.api_url, json=payload, timeout=5)
-        except Exception:
-            self.handleError(record)
-
 def renamer(name):
     base, date = name.rsplit(".", 1)
     filename, ext = os.path.splitext(base)
