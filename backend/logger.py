@@ -7,9 +7,6 @@ from logging.handlers import TimedRotatingFileHandler
 
 load_dotenv()
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-LOGS_CHANNEL_ID = os.getenv("LOGS_CHANNEL_ID")
-IS_TG_LOGGING_ON = False
 
 log_dir = "logs"
 os.makedirs(log_dir, exist_ok=True)
@@ -107,11 +104,6 @@ if DISCORD_WEBHOOK_URL:
     discord_handler = DiscordWebhookHandler(DISCORD_WEBHOOK_URL)
     discord_handler.setFormatter(formatter)
     logger.addHandler(discord_handler)
- 
-if BOT_TOKEN and LOGS_CHANNEL_ID and IS_TG_LOGGING_ON:
-    tg_handler = TelegramHandler(BOT_TOKEN, LOGS_CHANNEL_ID)
-    tg_handler.setFormatter(formatter)
-    logger.addHandler(tg_handler)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
