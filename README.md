@@ -2,7 +2,7 @@
 Operational Threat Monitoring Information System
 
 > [!IMPORTANT]
-> This project is now archived, I don't work on it anymore
+> This project is now archived, I don't work on it anymore.
 > The website will remain working for about 2 months (vps is paid for this time) and then will be shut down.
 
 ## README Languages / Языки README
